@@ -90,5 +90,13 @@ button {
 .router-link-exact-active {
   color: #4696E7;
 }
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+}
+input[type="number"] {
+    -moz-appearance: textfield;
+}
 /* eslint-disable eol-last */  
 </style>

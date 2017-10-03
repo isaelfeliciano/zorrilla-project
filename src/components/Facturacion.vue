@@ -141,6 +141,18 @@ export default {
       this.cleanFields()
     },
     facturar () {
+      if (
+        this.nombreCentro === '' ||
+        this.directorCentro === '' ||
+        this.provincia === '' ||
+        this.codigoCentro === '' ||
+        this.telefono === '' ||
+        this.distrito === '' ||
+        this.raciones === 0
+      ) {
+        return window.flash('Debe llenar todos los campos', 'error')
+      }
+      this.saveCentre()
       console.log(this.nextConduce)
       let self = this
       let obj = {
@@ -157,24 +169,13 @@ export default {
         total: this.total,
         raciones: this.raciones
       }
-      console.log(obj)
-      let arr = []
       obj.listaProductos = self.listaProductos
-      window.$('.product-row').each((index, element) => {
-        arr.push({
-          nombre: window.$(element).children('td').text(),
-          cantidad: parseInt(window.$(element).children('td').next().children().val())
-        })
-        if (index === (window.$('.product-row').length - 1)) {
-          // obj.listaProductos = arr
-          self.mongoDbObj.conduces.insert(obj, (err, result) => {
-            if (err) return console.log(err)
-            self.updateNextConduce()
-            window.flash('Conduce salvado', 'success')
-            localStorage.setObj('factura', obj)
-            self.$router.push('/factura')
-          })
-        }
+      self.mongoDbObj.conduces.insert(obj, (err, result) => {
+        if (err) return console.log(err)
+        self.updateNextConduce()
+        window.flash('Conduce salvado', 'success')
+        localStorage.setObj('factura', obj)
+        self.$router.push('/factura')
       })
     },
     facturarBatch () {
@@ -186,7 +187,7 @@ export default {
           if (err) return console.log(err)
           console.log(i)
           doc[0].conduce = self.nextConduce + i
-          doc[0].date = window.moment().format('DD/MMMM/YYYY')
+          doc[0].date = window.moment(this.fechaBatch, 'YYYY-MM-DD').format('DD/MMMM/YYYY')
           let tempArray = []
           doc[0].listaProductos.forEach((e, i) => {
             e.precio = self.listaProductos[i].precio
@@ -250,6 +251,7 @@ export default {
     },
     // For Review
     recalcutate (nombre, itbis, event) {
+      console.log(event)
       let cantidad = event.target.valueAsNumber
       let self = this
       console.log(cantidad)
@@ -273,6 +275,7 @@ export default {
               // console.log(self.listaProductos)
               self.total = window._.sum(tempArray)
               console.log(self.total)
+              console.log(self.listaProductos)
             }
           })
         }

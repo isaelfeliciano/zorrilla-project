@@ -48,7 +48,7 @@
 
       <button class="btn" @click="createRelacion">Continuar</button>
 
-      <button @click="getRelacionList" class="btn btn--list-relaciones block center-align">Lista Relaciones</button>
+      <button v-show="false" @click="getRelacionList" class="btn btn--list-relaciones block center-align">Lista Relaciones</button>
     </div>  
   </div>
 </template>
