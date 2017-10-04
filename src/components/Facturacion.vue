@@ -44,7 +44,7 @@
         <label for="nombre-centro">Nombre Centro<input type="text" name="nombre-centro" v-model="nombreCentro"></label>
         <label for="director-centro">Director Centro<input type="text" name="director-centro" v-model="directorCentro"></label>
         <label for="provincia">Provincia<input type="text" name="provincia" v-model="provincia"></label>
-        <label for="codigo-centro">Codigo Centro<input type="text" name="codigo-centro" v-model="codigoCentro"></label>
+        <label for="codigo-centro">Código Centro<input type="text" name="codigo-centro" v-model="codigoCentro"></label>
         <label for="telefono">Telefono<input type="text" name="telefono" v-model="telefono"></label>
         <label for="distrito">Distrito<input type="text" name="distrito" v-model="distrito"></label>
         <label for="fecha">Fecha<input type="date" name="fecha" v-model="fecha"></label>

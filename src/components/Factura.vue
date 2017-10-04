@@ -12,13 +12,13 @@
         <p>Nombre de Centro: {{ factura.nombreCentro }}</p>
         <p v-if="factura.directorCentro">Director Centro: {{ factura.directorCentro }}</p>
         <p v-else>Director Centro: ___________________________</p>
-        <p>Provicia: {{ factura.provincia }}</p>
+        <p>Provincia: {{ factura.provincia }}</p>
       </div>
 
       <div class="datos-centro__right inline-block">
         <p>Conduce: {{ factura.conduce }}</p>
         <p>Fecha: {{ factura.date }}</p>
-        <p>Codigo Centro: {{ factura.codigoCentro }}</p>
+        <p>Código Centro: {{ factura.codigoCentro }}</p>
         <p v-if="factura.telefono">Telefono: {{ factura.telefono }}</p>
         <p v-else>Telefono: _____________</p>
         <p>Distrito: {{ factura.distrito }}</p>
@@ -30,7 +30,7 @@
     <table class="pure-table pure-table-bordered center-align margin-sm">
           <thead>
             <tr>
-              <th>Descripcion del Producto</th>
+              <th>Descripción del Producto</th>
               <th>Cantidad</th>
             </tr>
           </thead>

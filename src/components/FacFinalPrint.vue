@@ -19,7 +19,7 @@
     <table class="pure-table pure-table-bordered center-align margin-sm">
       <thead>
         <tr>
-          <th>Descripcion del Producto</th>
+          <th>Descripción del Producto</th>
           <th>Cantidad</th>
           <th>Precio</th>
           <th>ITBIS</th>

@@ -3,9 +3,9 @@
 		<p>{{ datosEmpresa.name }}</p>
 		<ul>
 			<li><router-link class="link" to="/">Inicio</router-link></li>
-			<li><router-link class="link" to="/facturacion">Facturacion</router-link></li>
+			<li><router-link class="link" to="/facturacion">Facturación</router-link></li>
 			<li><router-link class="link" to="/facfinal">Fac.Final</router-link></li>
-			<li><router-link class="link" to="/relacion">Relacion</router-link></li>
+			<li><router-link class="link" to="/relacion">Relación</router-link></li>
 			<li><router-link class="link" to="/productos">Productos</router-link></li>
 			<li><router-link class="link" to="/datosempresa">Datos Empresa</router-link></li>
 		</ul>
