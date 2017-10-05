@@ -1,0 +1,8 @@
+VALUE "CompanyName", "Dev_Icio"
+		VALUE "FileDescription", "DistProApp"
+		VALUE "InternalName", "distproapp_exe"
+		VALUE "LegalCopyright", "MIT"
+		VALUE "OriginalFilename", "DistProApp.exe"
+		VALUE "ProductName", "DistProApp"
+		VALUE "CompanyShortName", "Dev_Icio"
+		VALUE "ProductShortName", "DistProApp"

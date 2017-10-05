@@ -34,7 +34,10 @@
 
     <div v-else class="select-month-year center-text">
       <p>Seleccione Fecha para crear Relación</p>
-      <input v-model="fechaFacturacion" type="date" name="fecha-relacion" class="box-radius">
+      <select v-model="dateSelected">
+        <option v-for="date in listDaysWithConduce" v-if="date._id !== null" :value="date._id">{{ date._id }}</option>
+      </select>
+      <!-- <input v-model="fechaFacturacion" type="date" name="fecha-relacion" class="box-radius"> -->
      <!--  <select v-model="monthSelected">
         <option v-for="month in moment.months()" :value="month">{{ month }}</option>
       </select>
@@ -67,13 +70,16 @@
         showRelacionTable: false,
         conducesList: [],
         total: 0,
-        totalRaciones: 0
+        totalRaciones: 0,
+        listDaysWithConduce: [],
+        dateSelected: ''
       }
     },
     methods: {
       createRelacion () {
         let self = this
-        let fechaFacturacion = window.moment(this.fechaFacturacion, 'YYYY-MM-DD').format('DD/MMMM/YYYY')
+        if (this.dateSelected === undefined) return window.flash('No ha seleccionado una fecha', 'warning')
+        let fechaFacturacion = this.dateSelected
         this.mongoDbObj.relaciones.find({fechaFacturacion: fechaFacturacion}).toArray((err, doc) => {
           if (err) return console.log(err)
           if (doc[0]) return window.flash('La Relacion para este mes ya existe', 'error')
@@ -117,6 +123,13 @@
       periodoRelacion () {
         let string = 'Relación de Factura del ' + this.startOfMonth + ' al ' + this.endOfMonth + ' de ' + this.monthSelected + ' del ' + this.yearSelected
         return string
+      },
+      getDaysWithConduce () {
+        let self = this
+        this.mongoDbObj.conduces.aggregate([ { $group: { _id: '$date' } } ]).toArray((err, result) => {
+          if (err) return console.log(err)
+          self.listDaysWithConduce = result
+        })
       }
     },
     computed: {
@@ -128,6 +141,9 @@
         // let self = this
         return window.moment(this.monthSelected, 'MMMM').endOf('month').format('DD')
       }
+    },
+    created: function () {
+      this.getDaysWithConduce()
     }
   }
 </script>
