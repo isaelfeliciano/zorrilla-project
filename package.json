@@ -80,7 +80,7 @@
   "main": "http://localhost:8080",
   "manifestUrl": "http://localhost:8080/releases/upgrade.json",
   "window": {
-    "title": "vue-nw-seed",
+    "title": "DistProApp",
     "toolbar": false,
     "width": 1110,
     "height": 660,
