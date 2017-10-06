@@ -31,9 +31,9 @@
         <tr v-for="item in facturaFinal.listaProductos">
           <td>{{ item.nombre }}</td>
           <td class="number">{{ item.total }}</td>
-          <td class="number">{{ item.precio }}</td>
-          <td class="itbis number">{{ numeral(percentage(item.total, item.precio)).format('0.00') }}</td>
-          <td class="total number">{{ numeral(multiplicar(item.total, item.precio)).format('0.00') }}</td>
+          <td class="number">{{ numeral(item.precio).format('0,0.00') }}</td>
+          <td class="itbis number">{{ numeral(percentage(item.total, item.precio)).format('0,0.00') }}</td>
+          <td class="total number">{{ numeral(multiplicar(item.total, item.precio)).format('0,0.00') }}</td>
         </tr>
 
         <tr>
@@ -41,7 +41,7 @@
           <td></td>
           <td></td>
           <td class="bold">SUB-TOTAL</td>
-          <td class="number">{{ facturaFinal.subTotal }}</td>
+          <td class="number">{{ numeral(facturaFinal.subTotal).format('0,0.00') }}</td>
         </tr>
 
         <tr>
@@ -49,7 +49,7 @@
           <td></td>
           <td></td>
           <td class="bold">ITBIS</td>
-          <td class="number">{{ facturaFinal.itbis }}</td>
+          <td class="number">{{ numeral(facturaFinal.itbis).format('0,0.00') }}</td>
         </tr>
 
         <tr>
@@ -57,7 +57,7 @@
           <td></td>
           <td></td>
           <td class="bold">TOTAL GENERAL</td>
-          <td class="number">{{ facturaFinal.totalGeneral }}</td>
+          <td class="number">{{ numeral(facturaFinal.totalGeneral).format('0,0.00') }}</td>
         </tr>
       </tbody>
     </table> 

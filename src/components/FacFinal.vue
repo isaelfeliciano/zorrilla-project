@@ -280,7 +280,7 @@
         let self = this
         let tempArray = []
         window.$('.total').each((index, element) => {
-          tempArray.push(parseInt(window.$(element).text()))
+          tempArray.push(parseFloat(window.$(element).text()))
           if (index === (window.$('.total').length - 1)) {
             self.total = window.numeral(window._.sum(tempArray)).format('0.00')
           }
@@ -290,7 +290,7 @@
         let self = this
         let tempArray = []
         window.$('.itbis').each((index, element) => {
-          tempArray.push(parseInt(window.$(element).text()))
+          tempArray.push(parseFloat(window.$(element).text()))
           if (index === (window.$('.itbis').length - 1)) {
             self.itbisTotal = window.numeral(window._.sum(tempArray)).format('0.00')
           }
