@@ -78,7 +78,7 @@
         window.$('.productos__product-row').each((index, element) => {
           arr.push({
             nombre: window.$(element).children('td:nth-child(1)').text(),
-            precio: parseInt(window.$(element).children('td').next().children().val()),
+            precio: parseFloat(window.$(element).children('td').next().children().val()),
             itbis: parseFloat(window.$(element).children('td').next().next().children().val())
           })
           if (index === (window.$('.productos__product-row').length - 1)) {
