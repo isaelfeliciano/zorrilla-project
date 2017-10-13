@@ -32,7 +32,7 @@
                 <td>{{ item.nombre }}</td>
                 <td>{{ item.total }}</td>
                 <td>{{ item.precio }}</td>
-                <td v-if="item.itbis === 0.18" class="itbis">{{ percentage(item.total, item.precio) }}</td>
+                <td v-if="item.itbis !== 0" class="itbis">{{ percentage(item.total, item.precio, item.itbis) }}</td>
                 <td v-else >0</td>
                 <td class="total">{{ multiplicar(item.total, item.precio) }}</td>
               </tr>
@@ -271,9 +271,9 @@
         let result = window.numeral(a * b).format('0.00')
         return result
       },
-      percentage (a, b) {
+      percentage (a, b, itbis) {
         let add = a * b
-        let result = window.numeral((add * 0.18)).format('0.00')
+        let result = window.numeral((add * itbis)).format('0.00')
         return result
       },
       getSubTotal () {

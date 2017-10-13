@@ -188,6 +188,8 @@ export default {
           console.log(i)
           doc[0].conduce = self.nextConduce + i
           doc[0].date = window.moment(this.fechaBatch, 'YYYY-MM-DD').format('DD/MMMM/YYYY')
+          doc[0].month = window.moment(this.fechaBatch, 'YYYY-MM-DD').format('MMMM')
+          doc[0].year = window.moment(this.fechaBatch, 'YYYY-MM-DD').format('YYYY')
           let tempArray = []
           doc[0].listaProductos.forEach((e, i) => {
             e.precio = self.listaProductos[i].precio

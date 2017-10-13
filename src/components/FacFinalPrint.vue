@@ -32,7 +32,7 @@
           <td>{{ item.nombre }}</td>
           <td class="number">{{ item.total }}</td>
           <td class="number">{{ numeral(item.precio).format('0,0.00') }}</td>
-          <td class="itbis number">{{ numeral(percentage(item.total, item.precio)).format('0,0.00') }}</td>
+          <td class="itbis number">{{ numeral(percentage(item.total, item.precio, item.itbis)).format('0,0.00') }}</td>
           <td class="total number">{{ numeral(multiplicar(item.total, item.precio)).format('0,0.00') }}</td>
         </tr>
 
@@ -83,9 +83,9 @@
         let result = a * b
         return result
       },
-      percentage (a, b) {
+      percentage (a, b, itbis) {
         let add = a * b
-        let result = (add * 0.18)
+        let result = window.numeral((add * itbis)).format('0.00')
         return result
       }
     },
