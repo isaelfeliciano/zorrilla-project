@@ -71,6 +71,7 @@
         </table> 
 
         <button @click="facturar" v-show="showBtnFactuar" class="btn__facturar">Facturar</button> 
+        <button @click="deleteConduce" v-show="showBtnGuardar" class="btn__facturar btn__facturar__delete">Borrar</button> 
         <button @click="updateConduce" v-show="showBtnGuardar" class="btn__facturar">Guardar</button> 
       </div>
     </div>
@@ -104,7 +105,8 @@ export default {
       listaFacturas: [],
       searchValue: '',
       conduce: '',
-      _id: ''
+      _id: '',
+      answerDeleteConduce: ''
     }
   },
   methods: {
@@ -341,6 +343,20 @@ export default {
         }
       })
     },
+    deleteConduce () {
+      let self = this
+      this.answerDeleteConduce = confirm('Desea realmente borrar este conduce? Conduce: ' + this.conduce)
+      if (this.answerDeleteConduce === true) {
+        this.mongoDbObj.conduces.deleteOne({'conduce': self.conduce}, (err, result) => {
+          if (err) return window.flash('Error al borrar Conduce', 'error')
+          window.flash('Conduce borrado', 'info')
+          self.$router.push('/')
+          setTimeout(() => {
+            self.$router.push('/facturacion')
+          }, 100)
+        })
+      }
+    },
     showSearchBoxMethod () {
       // window.$('input[name="search-conduce"]').focus()
       this.showSearchBox = true
@@ -510,6 +526,11 @@ table {
   position: fixed;
   bottom: 1rem;
   right: 5rem;
+}
+.btn__facturar__delete {
+  background-color: #E73A38; // Red
+  bottom: 4rem;
+  width: 7.5rem;
 }
 /* eslint-disable eol-last */ 
 </style>
