@@ -222,7 +222,7 @@
         let self = this
         return new Promise((resolve, reject) => {
           this.mongoDbObj.conduces.aggregate([
-            { $match: { month: self.monthSelected } },
+            { $match: { month: self.monthSelected, year: self.yearSelected } },
             { $unwind: '$listaProductos' },
             { $match: { 'listaProductos.cantidad': { $gte: 1 } } },
             { $group: { _id: '$listaProductos.nombre', total: { $sum: '$listaProductos.cantidad' } } },
@@ -305,7 +305,7 @@
       getConduceRange () {
         let self = this
         this.mongoDbObj.conduces.aggregate([
-        { $match: { month: self.monthSelected } },
+        { $match: { month: self.monthSelected, year: self.yearSelected } },
         { $sort: { conduce: 1 } }
         ]).toArray((err, doc) => {
           if (err) return console.log(err)

@@ -121,7 +121,7 @@
         })
       },
       periodoRelacion () {
-        let string = 'Relación de Factura del ' + this.startOfMonth + ' al ' + this.endOfMonth + ' de ' + this.monthSelected + ' del ' + this.yearSelected
+        let string = 'Relación de Factura del ' + this.startOfMonth + ' al ' + this.endOfMonth + ' de ' + this.getMonth(this.dateSelected) + ' del ' + this.getYear(this.dateSelected)
         return string
       },
       getDaysWithConduce () {
@@ -130,16 +130,22 @@
           if (err) return console.log(err)
           self.listDaysWithConduce = result
         })
+      },
+      getMonth (date) {
+        return window._.capitalize(window.moment(date, 'DD/MMMM/YYYY').format('MMMM'))
+      },
+      getYear (date) {
+        return window.moment(date, 'DD/MMMM/YYYY').format('YYYY')
       }
     },
     computed: {
       startOfMonth () {
         // let self = this
-        return window.moment(this.monthSelected, 'MMMM').startOf('month').format('DD')
+        return window.moment(this.dateSelected, 'DD/MMMM/YYYY').startOf('month').format('DD')
       },
       endOfMonth () {
         // let self = this
-        return window.moment(this.monthSelected, 'MMMM').endOf('month').format('DD')
+        return window.moment(this.dateSelected, 'DD/MMMM/YYYY').endOf('month').format('DD')
       }
     },
     created: function () {
