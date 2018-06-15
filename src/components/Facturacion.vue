@@ -84,7 +84,7 @@ export default {
   name: 'facturacion',
   data: function () {
     return {
-      msg: 'Welcome to Your Vue.js App',
+      msg: 'Zorrilla APP',
       showNoCentroSelected: true,
       showBtnFactuar: true,
       showBtnGuardar: false,
@@ -118,6 +118,7 @@ export default {
       })
     },
     saveCentre () {
+      if (this.nombreCentro === '') return window.flash('No ha seleccionado un centro', 'error')
       let self = this
       let datosCentro = {
         nombreCentro: this.nombreCentro,
@@ -183,12 +184,20 @@ export default {
     facturarBatch () {
       let self = this
       this.showBatchBox = false
+      if (window.moment(this.fechaBatch, 'YYYY-MM-DD').format('DD/MMMM/YYYY') === 'Invalid date') {
+        this.showBatchBox = true
+        return window.flash('Ha entrado una fecha invalida', 'error')
+      }
       window.flash('Preparando Facturas', 'info')
       this.listaCentros.forEach((e, i) => {
         this.mongoDbObj.conduces.find({ nombreCentro: e.nombreCentro }, { _id: false }).sort({_id: -1}).limit(1).toArray((err, doc) => {
           if (err) return console.log(err)
           console.log(i)
-          doc[0].conduce = self.nextConduce + i
+          if (i === 0) {
+            doc[0].conduce = self.nextConduce
+          } else {
+            doc[0].conduce = self.nextConduce + i
+          }
           doc[0].date = window.moment(this.fechaBatch, 'YYYY-MM-DD').format('DD/MMMM/YYYY')
           doc[0].month = window.moment(this.fechaBatch, 'YYYY-MM-DD').format('MMMM')
           doc[0].year = window.moment(this.fechaBatch, 'YYYY-MM-DD').format('YYYY')
@@ -207,15 +216,20 @@ export default {
         })
         if (i === (self.listaCentros.length - 1)) {
           setTimeout(() => {
-            console.log((self.listaCentros.length - 1))
-            self.updateNextConduceToThis(self.listaFacturas[(self.listaCentros.length - 1)].conduce + 1)
+            console.log(self.listaCentros.slice(-1).pop())
+            // self.updateNextConduceToThis(self.listaFacturas.slice(-1).pop().conduce + 1)
+            let conduce = self.nextConduce + self.listaFacturas.length
+            self.updateNextConduceToThis(conduce)
+            self.listaFacturas.sort((a, b) => {
+              return a.conduce - b.conduce
+            })
             localStorage.setObj('facturaBatch', self.listaFacturas)
             self.$router.push('/facturabatch')
             self.mongoDbObj.conduces.insertMany(self.listaFacturas, (err, result) => {
               if (err) return console.log(err)
               window.flash('Facturas salvadas en Base de Datos', 'info')
             })
-          }, 1000)
+          }, 2000)
         }
       })
     },
@@ -430,12 +444,16 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+$dark-blue: #313E48;
 .facturacion {
+  position: relative;
+  top: 4rem;
   width: 100%;
-  height: 90%;
+  height: 80%;
   overflow-y: auto;
 }
 .facturacion__header {
+  position: fixed;
   height: 4rem;
   width: 100%;
   background-color: #D2D6D6;

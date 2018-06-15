@@ -87,6 +87,9 @@
             if (err) console.log(err)
             if (doc[0] === undefined) return window.flash('No existen Conduce para esta fecha', 'info')
             self.conducesList = doc
+            self.conducesList.sort((a, b) => {
+              return a.conduce - b.conduce
+            })
             self.showRelacionTable = true
             setTimeout(() => {
               self.getTotal()
@@ -98,6 +101,7 @@
         window.flash('No ready yet', 'info')
       },
       printRelacion () {
+        console.log(this.conducesList)
         let self = this
         let obj = {
           total: self.total,
@@ -189,7 +193,7 @@ input {
 .btn__print-relacion {
   position: fixed;
   bottom: 1rem;
-  right: 5rem;
+  right: 4rem;
 }
 
 .periodo-relacion {

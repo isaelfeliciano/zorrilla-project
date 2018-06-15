@@ -78,6 +78,7 @@
               <li><span>NCF: </span>{{ item.ncf }}</li>
               <li><span>Cliente: </span>{{ item.client }}</li>
               <li><span>Total: </span>RD$ {{ numeral(item.totalGeneral).format('0,0.00') }}</li>
+              <li @click.stop="deleteFacFinal(item._id)"><span>| <i class="fa fa-trash delete-button"></i></span></li>
             </ul>
           </div>
         </div>
@@ -85,7 +86,7 @@
         <div v-else>
           <p>Seleccione Mes y Año para crear Factura Final</p>
           <select v-model="monthSelected">
-            <option v-for="month in moment.months()" :value="month">{{ month }}</option>
+            <option v-for="month in moment.months()" :value="month">{{ lodash.capitalize(month) }}</option>
           </select>
 
           <select v-model="yearSelected">
@@ -217,6 +218,20 @@
           localStorage.setObj('facturaFinal', obj)
           self.$router.push('/facfinalprint')
         })
+      },
+      deleteFacFinal (id) {
+        let self = this
+        let answerDeleteFacFinal = confirm('Desea realmente borrar esta Factura Final?')
+        if (answerDeleteFacFinal === true) {
+          this.mongoDbObj.facturasFinales.deleteOne({_id: id}, (err, result) => {
+            if (err) return window.flash('Error al borrar Factura Final', 'error')
+            window.flash('Factura Final borrada', 'info')
+            self.$router.push('/')
+            setTimeout(() => {
+              self.$router.push('/facfinal')
+            }, 100)
+          })
+        }
       },
       getTotalProductsSellMonth () {
         let self = this
@@ -420,6 +435,9 @@
       & span {
         color: #004A7C;
         font-weight: normal;
+      }
+      & .delete-button:hover {
+        color: #E73A38;
       }
     }
   }
