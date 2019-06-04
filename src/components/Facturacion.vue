@@ -2,6 +2,7 @@
   <div class="facturacion">
     <div class="facturacion__header">
       <select v-model="centroSelected" class="box-radius">
+        <option disabled value="">Seleccione Centro</option>
         <option v-for="item in listaCentros" :value="item.nombreCentro">{{ item.nombreCentro }}</option>
       </select>
       <button @click="saveCentre">Guardar</button>
@@ -36,7 +37,7 @@
       </transition>
     </div>
 
-    <p v-if="showNoCentroSelected" class="no-centro-selected">Seleccione un centro de el menu arriba</p>
+    <p v-if="showNoCentroSelected" class="no-centro-selected">Seleccione un centro de el menú</p>
 
     <div v-else class="datos-centro">
       <h2 class="center-text">Datos Centro</h2>
@@ -90,7 +91,7 @@ export default {
       showBtnGuardar: false,
       showSearchBox: false,
       showBatchBox: false,
-      centroSelected: 'Seleccione un Centro',
+      centroSelected: '',
       nombreCentro: '',
       directorCentro: '',
       provincia: '',
@@ -112,6 +113,10 @@ export default {
   methods: {
     getCentrosList () {
       let self = this
+      if (self.mongoDbObj.db.serverConfig.isConnected() === false) {
+        self.handleDBError('Test')
+        return
+      }
       this.mongoDbObj.centrosEducativos.find({}).toArray((err, doc) => {
         if (err) return console.log(err)
         self.listaCentros = doc
@@ -128,6 +133,10 @@ export default {
         telefono: this.telefono,
         distrito: this.distrito,
         raciones: this.raciones
+      }
+      if (self.mongoDbObj.db.serverConfig.isConnected() === false) {
+        self.handleDBError('Test')
+        return
       }
       this.mongoDbObj.centrosEducativos.update({nombreCentro: self.nombreCentro}, datosCentro, {upsert: true}, (err, result) => {
         if (err) return console.log(err)
@@ -173,6 +182,10 @@ export default {
         raciones: this.raciones
       }
       obj.listaProductos = self.listaProductos
+      if (self.mongoDbObj.db.serverConfig.isConnected() === false) {
+        self.handleDBError('Test')
+        return
+      }
       self.mongoDbObj.conduces.insert(obj, (err, result) => {
         if (err) return console.log(err)
         self.updateNextConduce()
@@ -189,35 +202,51 @@ export default {
         return window.flash('Ha entrado una fecha invalida', 'error')
       }
       window.flash('Preparando Facturas', 'info')
-      this.listaCentros.forEach((e, i) => {
-        this.mongoDbObj.conduces.find({ nombreCentro: e.nombreCentro }, { _id: false }).sort({_id: -1}).limit(1).toArray((err, doc) => {
-          if (err) return console.log(err)
-          console.log(i)
-          if (i === 0) {
-            doc[0].conduce = self.nextConduce
-          } else {
-            doc[0].conduce = self.nextConduce + i
-          }
-          doc[0].date = window.moment(this.fechaBatch, 'YYYY-MM-DD').format('DD/MMMM/YYYY')
-          doc[0].month = window.moment(this.fechaBatch, 'YYYY-MM-DD').format('MMMM')
-          doc[0].year = window.moment(this.fechaBatch, 'YYYY-MM-DD').format('YYYY')
-          let tempArray = []
-          doc[0].listaProductos.forEach((e, i) => {
-            e.precio = self.listaProductos[i].precio
-            e.itbis = self.listaProductos[i].itbis
-            if (!e.cantidad) e.cantidad = 0
-            let total = (e.cantidad * e.precio) + ((e.cantidad * e.precio) * e.itbis)
-            tempArray.push(total)
-            if (i === (doc[0].listaProductos.length - 1)) {
-              doc[0].total = window._.sum(tempArray)
-              self.listaFacturas.push(doc[0])
-            }
+      if (self.mongoDbObj.db.serverConfig.isConnected() === false) {
+        self.handleDBError('Test')
+        return
+      }
+      function getByNombreCentro (nombreCentro) {
+        return new Promise((resolve, reject) => {
+          self.mongoDbObj.conduces.find({ nombreCentro: nombreCentro }).sort({_id: -1}).limit(1).toArray().then((doc) => {
+            delete doc[0]._id
+            resolve(doc)
+          })
+          .catch((err) => {
+            if (err) return window.flash('Error buscando en DB | "getByNombreCentro"', 'error')
           })
         })
-        if (i === (self.listaCentros.length - 1)) {
-          setTimeout(() => {
+      }
+
+      async function processListaCentros () {
+        let length = self.listaCentros.length
+        for (let i = 0; i < length; i++) {
+          let e = self.listaCentros[i]
+          await getByNombreCentro(e.nombreCentro).then((doc) => {
+            if (i === 0) {
+              doc[0].conduce = self.nextConduce
+            } else {
+              doc[0].conduce = self.nextConduce + i
+            }
+            doc[0].date = window.moment(self.fechaBatch, 'YYYY-MM-DD').format('DD/MMMM/YYYY')
+            doc[0].month = window.moment(self.fechaBatch, 'YYYY-MM-DD').format('MMMM')
+            doc[0].year = window.moment(self.fechaBatch, 'YYYY-MM-DD').format('YYYY')
+            let tempArray = []
+            doc[0].listaProductos.forEach((e, i) => {
+              e.precio = self.listaProductos[i].precio
+              e.itbis = self.listaProductos[i].itbis
+              e.measureUnit = self.listaProductos[i].measureUnit
+              if (!e.cantidad) e.cantidad = 0
+              let total = (e.cantidad * e.precio) + ((e.cantidad * e.precio) * e.itbis)
+              tempArray.push(total)
+              if (i === (doc[0].listaProductos.length - 1)) {
+                doc[0].total = window._.sum(tempArray)
+                self.listaFacturas.push(doc[0])
+              }
+            })
+          })
+          if (i === (self.listaCentros.length - 1)) { // When the for-loop is done
             console.log(self.listaCentros.slice(-1).pop())
-            // self.updateNextConduceToThis(self.listaFacturas.slice(-1).pop().conduce + 1)
             let conduce = self.nextConduce + self.listaFacturas.length
             self.updateNextConduceToThis(conduce)
             self.listaFacturas.sort((a, b) => {
@@ -229,9 +258,10 @@ export default {
               if (err) return console.log(err)
               window.flash('Facturas salvadas en Base de Datos', 'info')
             })
-          }, 2000)
+          }
         }
-      })
+      }
+      processListaCentros()
     },
     getNextConduce () {
       let self = this
@@ -243,15 +273,16 @@ export default {
     updateNextConduce () {
       let self = this
       let nextConduce = this.nextConduce + 1
-      this.mongoDbObj.conduces.updateOne({id: 'nextConduce'}, {id: 'nextConduce', nextConduce: nextConduce}, (err, result) => {
+      this.mongoDbObj.conduces.updateOne({id: 'nextConduce'}, {$set: {id: 'nextConduce', nextConduce: nextConduce}}, (err, result) => {
         if (err) return console.log(err)
         console.log('nextConduce updated')
         self.getNextConduce()
       })
     },
     updateNextConduceToThis (nextConduce) {
+      let self = this
       console.log(nextConduce)
-      this.mongoDbObj.conduces.updateOne({id: 'nextConduce'}, {id: 'nextConduce', nextConduce: nextConduce}, (err, result) => {
+      this.mongoDbObj.conduces.updateOne({id: 'nextConduce'}, {$set: {id: 'nextConduce', nextConduce: nextConduce}}, (err, result) => {
         if (err) return console.log(err)
         console.log('nextConduce updated')
         self.getNextConduce()
@@ -302,6 +333,10 @@ export default {
     searchConduce () {
       let self = this
       if (this.searchValue === '') return window.flash('Entre un numero para iniciar la busqueda', 'info')
+      if (self.mongoDbObj.db.serverConfig.isConnected() === false) {
+        self.handleDBError('Test')
+        return
+      }
       this.mongoDbObj.conduces.find({conduce: this.searchValue}).toArray((err, doc) => {
         if (err) return console.log(err)
         if (!doc[0]) return window.flash('No hay resultados', 'info')
@@ -348,6 +383,10 @@ export default {
         })
         if (index === (window.$('.product-row').length - 1)) {
           // obj.listaProductos = arr
+          if (self.mongoDbObj.db.serverConfig.isConnected() === false) {
+            self.handleDBError('Test')
+            return
+          }
           self.mongoDbObj.conduces.update({ _id: self._id }, obj, (err, result) => {
             if (err) return console.log(err)
             window.flash('Conduce salvado', 'success')
@@ -361,6 +400,10 @@ export default {
       let self = this
       this.answerDeleteConduce = confirm('Desea realmente borrar este conduce? Conduce: ' + this.conduce)
       if (this.answerDeleteConduce === true) {
+        if (self.mongoDbObj.db.serverConfig.isConnected() === false) {
+          self.handleDBError('Test')
+          return
+        }
         this.mongoDbObj.conduces.deleteOne({'conduce': self.conduce}, (err, result) => {
           if (err) return window.flash('Error al borrar Conduce', 'error')
           window.flash('Conduce borrado', 'info')
@@ -382,6 +425,10 @@ export default {
       this.cleanFields()
       let self = this
       if (this.centroSelected === 'no-selected' || this.centroSelected === undefined) return
+      if (self.mongoDbObj.db.serverConfig.isConnected() === false) {
+        self.handleDBError('Test')
+        return
+      }
       this.mongoDbObj.conduces.find({ nombreCentro: this.centroSelected }).sort({_id: -1}).limit(1).toArray((err, doc) => { // Make this get just one
         if (err) return console.log(err)
         if (doc[0]) {
@@ -394,16 +441,22 @@ export default {
           self.distrito = d.distrito
           self.raciones = d.raciones || 0
           self.listaProductos = d.listaProductos
+          if (self.mongoDbObj.db.serverConfig.isConnected() === false) {
+            self.handleDBError('Test')
+            return
+          }
           self.mongoDbObj.productos.find({descripcion: 'productos'}).toArray((err, doc) => {
             if (err) console.log(err)
             let tempArray = doc[0].detalles
             let totalArray = []
             tempArray.forEach((item, index) => {
               let itbis = item.itbis
+              let measureUnit = item.measureUnit
               let precio = item.precio
               let cantidad = self.listaProductos[index].cantidad
               self.listaProductos[index]['itbis'] = itbis
               self.listaProductos[index]['precio'] = precio
+              self.listaProductos[index]['measureUnit'] = measureUnit
               let total = (cantidad * precio) + ((cantidad * precio) * itbis)
               totalArray.push(total)
               if (index === (tempArray.length - 1)) {
@@ -417,6 +470,10 @@ export default {
             })
           })
         } else {
+          if (self.mongoDbObj.db.serverConfig.isConnected() === false) {
+            self.handleDBError('Test')
+            return
+          }
           self.mongoDbObj.centrosEducativos.find({ nombreCentro: self.centroSelected }).toArray((err, doc) => {
             if (err) return console.log(err)
             let d = doc[0]
@@ -458,6 +515,7 @@ $dark-blue: #313E48;
   width: 100%;
   background-color: #D2D6D6;
   padding-right: 1rem;
+  top: 3rem;
   & select, input {
     margin: auto 1rem;
     font-size: 1.4rem;

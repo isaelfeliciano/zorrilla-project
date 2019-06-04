@@ -8,6 +8,7 @@
       >
         <div class="add-product-box center-align box-radius">
           <input v-model="productName" class="box-radius" type="text" name="product-name" placeholder="Nombre">
+          <input v-model="measureUnit" class="box-radius" type="text" name="measure-unit" placeholder="Unidad de Medida">
           <input v-model.number="productPrice" class="box-radius" type="text" name="produc-price" placeholder="Precio">
           <button @click="addProduct">Agregar Producto</button>
         </div>
@@ -18,6 +19,7 @@
         <thead>
           <tr>
             <th>Descripcion del Producto</th>
+            <th>Unidad de Medida</th>
             <th>Precios RD$</th>
             <th>ITBIS?</th>
           </tr>
@@ -26,24 +28,13 @@
         <tbody>
           <tr v-for="item in listaProductos" class="productos__product-row">
             <td>{{ item.nombre }}</td>
-            <td><input type="number" name="precio" :value="item.precio"></td>
+            <td><input type="text" name="measureUnit" v-model="item.measureUnit"></td>
+            <td><input type="number" name="precio" v-model.number="item.precio"></td>
             <td>
-              <select v-if="item.itbis === 0.18">
+              <select v-model.number="item.itbis">
                 <option value="0.18">18%</option>
                 <option value="0.16">16%</option>
                 <option value="0">No</option>
-              </select>
-
-              <select v-else-if="item.itbis === 0.16">
-                <option value="0.16">16%</option>
-                <option value="0">No</option>
-                <option value="0.18">18%</option>
-              </select>
-
-              <select v-else>
-                <option value="0">No</option>
-                <option value="0.16">16%</option>
-                <option value="0.18">18%</option>
               </select>
             </td>
           </tr>
@@ -61,16 +52,23 @@
     data () {
       return {
         productName: '',
+        measureUnit: '',
         productPrice: ''
       }
     },
     methods: {
       addProduct () {
-        if (this.productName === '' || this.productPrice === '') return window.flash('Debe completar los campos vacios', 'error')
-        this.listaProductos.push({nombre: this.productName, precio: this.productPrice, itbis: 0})
+        console.log(this.listaProductos)
+        /* if (this.productName === '' || this.productPrice === '') return window.flash('Debe completar los campos vacios', 'error')
+        this.listaProductos.push({
+          nombre: this.productName,
+          measureUnit: this.measureUnit,
+          precio: this.productPrice,
+          itbis: 0
+        })
         this.productName = ''
         this.productPrice = ''
-        this.listaProductos = window._.orderBy(this.listaProductos, ['nombre'])
+        this.listaProductos = window._.orderBy(this.listaProductos, ['nombre']) */
       },
       saveProducts () {
         let self = this
@@ -82,7 +80,7 @@
             itbis: parseFloat(window.$(element).children('td').next().next().children().val())
           })
           if (index === (window.$('.productos__product-row').length - 1)) {
-            self.mongoDbObj.productos.update({descripcion: 'productos'}, {descripcion: 'productos', detalles: arr}, (err, result) => {
+            self.mongoDbObj.productos.update({descripcion: 'productos'}, {descripcion: 'productos', detalles: self.listaProductos}, (err, result) => {
               if (err) return console.log(err)
               window.flash('Productos salvados', 'success')
             })
@@ -92,6 +90,7 @@
     },
     created () {
       this.getProductsList()
+      console.log(this.listaProductos)
     }
   }
 </script>

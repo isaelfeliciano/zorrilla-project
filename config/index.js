@@ -44,7 +44,7 @@ module.exports = {
         files: [resolve('./dist/**')],
         // platforms: ['win32', 'win64', 'osx64'],
         platforms: ['win32', 'win64'],
-        version: '0.14.7',
+        version: '0.33.3',
         flavor: 'normal',
         cacheDir: resolve('./node_modules/_nw-builder-cache/'),
         buildDir: resolve('./releases'),

@@ -1,6 +1,7 @@
 <template>
   <div class="home">
-    <p class="home__msg">{{ datosEmpresa.name }}</p>
+    <!-- <p class="home__msg">{{ datosEmpresa.name }}</p> -->
+    <img class="logo-z center-align" src="static/logo-z.png">
   </div>
 </template>
 
@@ -24,6 +25,11 @@ export default {
   position: relative;
   top: 10rem;
   color: #005691;
+}
+img.logo-z {
+  position: relative;
+  display: inherit;
+  max-width: 29rem;
 }
 
 </style>

@@ -1,6 +1,7 @@
 <template>
   <div class="relacion">
     <div v-if="showRelacionTable" class="relacion-table center-text">
+      <button @click="back" class="btn btn__back no-print"><i class="fa fa-arrow-left"></i></button>
       <input class="periodo-relacion center-align" type="text" name="periodo-relacion" :value="periodoRelacion()">
 
       <table class="pure-table pure-table-bordered center-align margin-sm">
@@ -33,24 +34,26 @@
     </div>
 
     <div v-else class="select-month-year center-text">
-      <p>Seleccione Fecha para crear Relación</p>
-      <select v-model="dateSelected">
-        <option v-for="date in listDaysWithConduce" v-if="date._id !== null" :value="date._id">{{ date._id }}</option>
-      </select>
-      <!-- <input v-model="fechaFacturacion" type="date" name="fecha-relacion" class="box-radius"> -->
-     <!--  <select v-model="monthSelected">
-        <option v-for="month in moment.months()" :value="month">{{ month }}</option>
+      <p>Seleccione Fecha y Centro para crear Relación</p>
+      <select v-model="monthSelected">
+        <option disabled value="">Mes</option>
+        <!--<option v-for="date in listDaysWithConduce" v-if="date._id !== null" :value="date._id">{{ date._id }}</option>--> 
+        <option v-for="month in moment.months()" :value="month">{{ lodash.capitalize(month) }}</option>     
       </select>
 
       <select v-model="yearSelected">
-        <option>2017</option>
-        <option>2018</option>
-        <option>2019</option>
-        <option>2020</option>
-      </select> -->
+        <option disabled value="">Año</option>
+        <option v-for="year in yearsList" :value="year.toString()">{{ year }}</option>
+      </select>
+
+      <select v-model="centroSelected" class="box-radius">
+        <option disabled value="">Seleccione Centro</option>
+        <option v-for="item in listaCentros" :value="item.nombreCentro">{{ item.nombreCentro }}</option>
+      </select>
 
       <button class="btn" @click="createRelacion">Continuar</button>
 
+      <button id="btn-monthly-report" @click="createRelacion('byMonth')" class="btn block center-align">Reporte Mensual</button>
       <button v-show="false" @click="getRelacionList" class="btn btn--list-relaciones block center-align">Lista Relaciones</button>
     </div>  
   </div>
@@ -61,10 +64,11 @@
     name: 'relacion',
     data () {
       return {
+        lodash: window._,
         moment: window.moment,
         numeral: window.numeral,
-        monthSelected: window.window.moment().format('MMMM'),
-        yearSelected: window.moment().format('YYYY'),
+        // monthSelected: window.window.moment().format('MMMM'),
+        // yearSelected: window.moment().format('YYYY'),
         fechaFacturacion: window.moment().format('YYYY-MM-DD'),
         fechaRelacion: window.moment().format('YYYY-MM-DD'),
         showRelacionTable: false,
@@ -72,18 +76,33 @@
         total: 0,
         totalRaciones: 0,
         listDaysWithConduce: [],
-        dateSelected: ''
+        monthSelected: '',
+        yearSelected: new Date().getFullYear().toString(),
+        centroSelected: '',
+        yearsList: []
       }
     },
     methods: {
       createRelacion () {
         let self = this
-        if (this.dateSelected === undefined) return window.flash('No ha seleccionado una fecha', 'warning')
-        let fechaFacturacion = this.dateSelected
-        this.mongoDbObj.relaciones.find({fechaFacturacion: fechaFacturacion}).toArray((err, doc) => {
+        if (this.monthSelected === undefined || this.monthSelected === '') return window.flash('No ha seleccionado un Mes', 'warning')
+        if (this.centroSelected === undefined || this.centroSelected === '') {
+          if (!arguments) return window.flash('No ha seleccionado un Centro', 'warning')
+        }
+        if (this.yearSelected === undefined || this.yearSelected === '') return window.flash('No ha seleccionado un Año', 'warning')
+        let fechaFacturacion = this.monthSelected
+        let query
+        if (arguments[0] === 'byMonth') {
+          localStorage.setItem('relacionType', 'RELACION DE CONDUCES GENERAL')
+          query = {month: self.monthSelected, year: self.yearSelected}
+        } else {
+          localStorage.setItem('relacionType', 'RELACION DE CONDUCES POR CENTRO')
+          query = {month: self.monthSelected, year: self.yearSelected, nombreCentro: self.centroSelected}
+        }
+        this.mongoDbObj.relaciones.find({month: fechaFacturacion}).toArray((err, doc) => {
           if (err) return console.log(err)
           if (doc[0]) return window.flash('La Relacion para este mes ya existe', 'error')
-          self.mongoDbObj.conduces.find({date: fechaFacturacion}).toArray((err, doc) => {
+          self.mongoDbObj.conduces.find(query).toArray((err, doc) => {
             if (err) console.log(err)
             if (doc[0] === undefined) return window.flash('No existen Conduce para esta fecha', 'info')
             self.conducesList = doc
@@ -125,7 +144,7 @@
         })
       },
       periodoRelacion () {
-        let string = 'Relación de Factura del ' + this.startOfMonth + ' al ' + this.endOfMonth + ' de ' + this.getMonth(this.dateSelected) + ' del ' + this.getYear(this.dateSelected)
+        let string = 'Relación de Factura del ' + this.startOfMonth + ' al ' + this.endOfMonth + ' de ' + window._.capitalize(this.monthSelected) + ' del ' + this.yearSelected
         return string
       },
       getDaysWithConduce () {
@@ -140,20 +159,39 @@
       },
       getYear (date) {
         return window.moment(date, 'DD/MMMM/YYYY').format('YYYY')
+      },
+      getCentrosList () {
+        let self = this
+        this.mongoDbObj.centrosEducativos.find({}).toArray((err, doc) => {
+          if (err) return console.log(err)
+          self.listaCentros = doc
+        })
+      },
+      back () {
+        // this.$router.push('/relacion')
+        this.showRelacionTable = false
+      },
+      getYearList () {
+        let currentYear = new Date().getFullYear()
+        for (var i = 0; i <= 10; i++) {
+          this.yearsList.push(currentYear - i)
+        }
       }
     },
     computed: {
       startOfMonth () {
         // let self = this
-        return window.moment(this.dateSelected, 'DD/MMMM/YYYY').startOf('month').format('DD')
+        return window.moment(this.monthSelected + '/' + this.yearSelected, 'MMMM/YYYY').startOf('month').format('DD')
       },
       endOfMonth () {
         // let self = this
-        return window.moment(this.dateSelected, 'DD/MMMM/YYYY').endOf('month').format('DD')
+        return window.moment(this.monthSelected + '/' + this.yearSelected, 'MMMM/YYYY').endOf('month').format('DD')
       }
     },
     created: function () {
       this.getDaysWithConduce()
+      this.getCentrosList()
+      this.getYearList()
     }
   }
 </script>
@@ -184,6 +222,13 @@
   }
 }
 
+.btn__back {
+  display: block;
+  position: relative;
+  top: 1rem;
+  left: 1rem;
+}
+
 input {
   font-size: 1.4rem;
   border: 2px solid #4696E7;
@@ -201,5 +246,9 @@ input {
   width: 90%;
   margin: 2rem auto;
   position: relative;
+}
+
+#btn-monthly-report {
+  margin-top: 3rem;
 }
 </style>

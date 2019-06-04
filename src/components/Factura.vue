@@ -1,21 +1,21 @@
 <template>
+  <div id="root">
   <div class="factura">
-    <h2 class="center-text">{{ datosEmpresa.name }}</h2>
     <div class="datos-company center-text">
+      <h2 class="center-text">{{ datosEmpresa.name }}</h2>
       <p>{{ datosEmpresa.address }}</p>
       <p>Contacto: {{ datosEmpresa.phone }}</p>
       <p>{{ datosEmpresa.rnc }}</p>
     </div>
 
-    <div class="datos-centro center-text">
-      <div class="datos-centro__left inline-block left">
-        <p>Nombre de Centro: {{ factura.nombreCentro }}</p>
+      <div class="datos-centro__left">
+        <p class="name">Nombre de Centro: {{ factura.nombreCentro }}</p>
         <p v-if="factura.directorCentro">Director Centro: {{ factura.directorCentro }}</p>
         <p v-else>Director Centro: ___________________________</p>
         <p>Provincia: {{ factura.provincia }}</p>
       </div>
 
-      <div class="datos-centro__right inline-block">
+      <div class="datos-centro__right">
         <p>Conduce: {{ factura.conduce }}</p>
         <p>Fecha: {{ factura.date }}</p>
         <p>Código Centro: {{ factura.codigoCentro }}</p>
@@ -23,14 +23,12 @@
         <p v-else>Telefono: _____________</p>
         <p>Distrito: {{ factura.distrito }}</p>
       </div>
-    </div>
-
-    <h4 class="center-text">DETALLES DE LAS RACIONES ENTREGADAS Y RECIBIDAS</h4>
 
     <table class="pure-table pure-table-bordered center-align margin-sm">
           <thead>
             <tr>
               <th>Descripción del Producto</th>
+              <th>Unidad de Medida</th>
               <th>Cantidad</th>
             </tr>
           </thead>
@@ -38,31 +36,34 @@
           <tbody>
             <tr v-for="item in factura.listaProductos" class="product-row" v-if="item.precio >= 1">
               <td>{{ item.nombre }}</td>
+              <td>{{ item.measureUnit }}</td>
               <td>{{ item.cantidad }}</td>
             </tr>
           </tbody>
         </table>
 
-        <p class="observaciones">OBSERVACIONES:</p> 
-        <div class="line"></div>
-        <div class="line"></div>
+        <div class="observaciones">
+          <label for="observaciones">
+            <p>Observaciones:</p>
+            <input type="text" name="observaciones">
+          </label>
+        </div>
+ 
+        <div class="footer__left">
+          <p class="center-text">________________________</p>
+          <p class="center-text">Firma y Sello Suplidor</p>
+        </div>
 
-
-        <footer>
-          <div class="footer__left">
-            <p class="center-text">________________________</p>
-            <p class="center-text">Firma y Sello Suplidor</p>
-          </div>
-
-          <div class="footer__right">
-            <p>Recibido Por:</p>
-            <p>Nombre: _________________</p>
-            <p>Firma: __________________</p>
-            <p>Fecha recp. _____________</p>
-            <p>Hora recp. ______________</p>
-          </div>
-        </footer>
+        <div class="footer__right">
+          <p>Recibido Por</p>
+          <p class="border_bottom">Nombre:</p>
+          <p class="border_bottom">Firma:</p>
+          <p class="border_bottom">Fecha Recp.:</p>
+          <p class="border_bottom">Hora Recp.:</p>
+        </div>
+        
   </div>
+</div>
 </template>
 
 <script>
@@ -83,50 +84,62 @@
       }, 1000)
     }
   }
-
 </script>
 
 <style lang="scss" scoped>
-@media print {
-  .no-print {
-    display: none;
-  }
+
+#root {
+  height: auto;
 }
 
 .factura {
-  width: 100%;
-  position: relative;
+  width: 21.6cm;
+  min-height: 27.9cm;
+  padding-left: 2cm;
+  padding-top: 2cm;
+  padding-right: 2cm;
+  padding-bottom: 2cm;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto auto auto auto;
+}
+
+@page {
+  size: letter portrait;
+  margin-left: 2cm;
+  margin-top: 2cm;
+  margin-right: 2cm;
+  margin-bottom: 2cm;
 }
 
 h2, h4 {
   margin: 0 auto 0.1rem auto;
 }
 .datos-company {
-  position: relative;
+  grid-column: span 2;
   & p {
-    font-size: 0.8rem;
+    // font-size: 0.8rem;
     line-height: 0.3rem;
   }
 }
 
-.datos-centro {
-  width: 100%;
-  position: relative;
-  line-height: 0.3rem;
-  & .datos-centro__left, .datos-centro__right {
-    text-align: left;
-    position: relative;
+.datos-centro__left {
+  line-height: 0.2rem;
+  & .name {
+    line-height: 1rem;
   }
-  & .datos-centro__right {
-    position: relative;
-    left: 8rem;
-  }
+}
+.datos-centro__right {
+  line-height: 0.2rem;
+  justify-self: end;
 }
 
 table {
-  width: 80%;
+  // width: 80%;
+  grid-column: span 2;
   & .product-row td {
-    font-size: 0.7rem;
+    // font-size: 0.7rem;
+    line-height: 0.3rem;
     font-weight: bold;
 
   }
@@ -136,30 +149,32 @@ table {
 }
 
 .observaciones {
-  margin: auto 0 auto 0;
-}
-
-.line {
-  width: 80%;
-  display: block;
-  border-bottom: 1px solid black;
-  height: 1rem;
-}
-
-footer {
-  width: 100%;
+  grid-column: span 2;
+  & label {
+    width: 100%;
+  }
   & p {
-    margin: auto 0 0.1rem 0;
+    width: 100%;
+    border-bottom: solid 1px black;
+    margin: 0 auto 0 auto;
   }
-  & .footer__left {
-    position: absolute;
-    bottom: 1rem;
-    left: 4rem;
-  }
-  & .footer__right {
-    position: relative;
-    top: 1rem;
-    left: 50%;
+  & input {
+    border: none;
+    border-bottom: solid 1px black;
+    border-radius: 0px;
+    width: 100%;
   }
 }
+
+.footer__left {
+  align-self: end;
+}
+
+.footer__right {
+  line-height: 0.9rem;
+  & .border_bottom {
+    border-bottom: solid 1px black;
+  }
+}
+
 </style>

@@ -8,6 +8,7 @@ import jQuery from 'jquery'
 import Moment from 'moment'
 import Numeral from 'numeral'
 import Lodash from 'lodash'
+const log4js = require('log4js')
 window.moment = Moment
 window.moment.locale('es-do')
 window.$ = jQuery
@@ -18,8 +19,22 @@ window.flash = function (message, type) {
 }
 window.numeral = Numeral
 window._ = Lodash
+// const ATLAS_CLUSTER_STRING = process.env.ATLAS_CLUSTER_STRING
+// const ATLAS_DEV_CREDS = process.env.ATLAS_DEV_CREDS
 var MongoClient = require('mongodb').MongoClient
 var mongoDbObj
+var mongoString
+var dataBaseString
+console.log(process.env.NODE_ENV)
+if (process.env.NODE_ENV === 'development') {
+  mongoString = 'mongodb://isael:yTS9ywfXXvVlEBPV@cluster0-shard-00-00-5lqqr.mongodb.net:27017,cluster0-shard-00-01-5lqqr.mongodb.net:27017,cluster0-shard-00-02-5lqqr.mongodb.net:27017/school_invoice_app_dev?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true'
+  dataBaseString = 'school_invoice_app_dev'
+  // mongoString = 'mongodb://127.0.0.1:27017/school_invoice_app'
+} else {
+  mongoString = 'mongodb://user:n9wfWJMLDt1AyBMN@cluster0-shard-00-00-5lqqr.mongodb.net:27017,cluster0-shard-00-01-5lqqr.mongodb.net:27017,cluster0-shard-00-02-5lqqr.mongodb.net:27017/school_invoice_app_yamasa?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true'
+  dataBaseString = 'school_invoice_app_yamasa'
+}
+console.log(mongoString)
 const vueFlash = require('vue-flash')
 Vue.config.productionTip = false
 Vue.component('app-header', Header)
@@ -28,6 +43,7 @@ Vue.mixin({
   data: function () {
     return {
       mongoDbObj: mongoDbObj,
+      logger: logger,
       listaProductos: [],
       listaCentros: [],
       datosEmpresa: localStorage.getObj('datosEmpresa')
@@ -38,8 +54,8 @@ Vue.mixin({
       let self = this
       this.mongoDbObj.productos.aggregate([
       { $unwind: '$detalles' },
-      { $group: { _id: { nombre: '$detalles.nombre', precio: '$detalles.precio', itbis: '$detalles.itbis' } } },
-      { $project: { _id: 0, 'nombre': '$_id.nombre', 'precio': '$_id.precio', 'itbis': '$_id.itbis' } },
+      { $group: { _id: { nombre: '$detalles.nombre', measureUnit: '$detalles.measureUnit', precio: '$detalles.precio', itbis: '$detalles.itbis' } } },
+      { $project: { _id: 0, 'nombre': '$_id.nombre', 'measureUnit': '$_id.measureUnit', 'precio': '$_id.precio', 'itbis': '$_id.itbis' } },
       { $sort: { nombre: 1 } }
       ]).toArray((err, doc) => {
         if (err) return console.log(err)
@@ -53,6 +69,10 @@ Vue.mixin({
         localStorage.setObj('datosEmpresa', doc[0])
         self.datosEmpresa = doc[0]
       })
+    },
+    handleDBError (err) {
+      window.flash('Error conectando a la Base de Datos. Revise su conexion a internet o intente mas tarde', 'error')
+      window.logger.error(err)
     }
   },
   watch: {
@@ -68,15 +88,27 @@ Storage.prototype.setObj = function (key, obj) {
 Storage.prototype.getObj = function (key) {
   return JSON.parse(this.getItem(key))
 }
+if (!localStorage.getObj('datosEmpresa') || localStorage.getObj('datosEmpresa') === undefined) {
+  localStorage.setObj('datosEmpresa', {name: 'N/A'})
+}
 
+log4js.configure({
+  appenders: { dist_pro: { type: 'file', filename: 'dist_pro.log' } },
+  categories: { default: { appenders: ['dist_pro'], level: 'error' } }
+})
+const logger = log4js.getLogger('dist_pro')
 function connectMongo () {
-  MongoClient.connect('mongodb://127.0.0.1:27017/school_invoice_app', (err, db) => {
+  MongoClient.connect(mongoString, (err, client) => {
     if (err) {
       startVue()
-      window.flash('Servidor Base de Datos no iniciado', 'error')
-      return console.log(err)
+      window.flash('Error al conectar a la Base de Datos', 'error')
+      logger.error(err)
+      return
     } else {
-      console.log('Connected to DB')
+      const db = client.db(dataBaseString)
+      startVue()
+      window.flash('Exito, Conectado a Base de Datos', 'success')
+      logger.info('Connected to DB')
       mongoDbObj = {
         db: db,
         productos: db.collection('productos'),
@@ -86,7 +118,6 @@ function connectMongo () {
         facturasFinales: db.collection('facturasFinales'),
         relaciones: db.collection('relaciones')
       }
-      startVue()
     }
   })
 }

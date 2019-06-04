@@ -11,7 +11,7 @@
 export default {
   name: 'app',
   created () {
-    this.getDatosEmpresa()
+    // this.getDatosEmpresa()
   }
 }
 </script>
