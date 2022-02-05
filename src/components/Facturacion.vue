@@ -37,7 +37,7 @@
       </transition>
     </div>
 
-    <p v-if="showNoCentroSelected" class="no-centro-selected">Seleccione un centro de el menú</p>
+    <p v-if="showNoCentroSelected" class="no-centro-selected">Seleccione un centro del menú</p>
 
     <div v-else class="datos-centro">
       <h2 class="center-text">Datos Centro</h2>

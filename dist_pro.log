@@ -110,3 +110,33 @@
   name: 'MongoError',
   message:
    'failed to connect to server [127.0.0.1:27017] on first connect [MongoError: connect ECONNREFUSED 127.0.0.1:27017]' }
+[2022-02-03T19:57:37.936] [ERROR] dist_pro - { MongoError: authentication fail
+    at eval (webpack-internal:///480:1456:15)
+    at eval (webpack-internal:///477:869:7)
+    at eval (webpack-internal:///477:845:20)
+    at finish (webpack-internal:///81:233:16)
+    at handleEnd (webpack-internal:///81:243:7)
+    at eval (webpack-internal:///81:352:15)
+    at eval (webpack-internal:///477:532:18)
+  errors:
+   [ { name: 'cluster0-shard-00-02-5lqqr.mongodb.net:27017',
+       err: [MongoError] },
+     { name: 'cluster0-shard-00-00-5lqqr.mongodb.net:27017',
+       err: [MongoError] } ],
+  name: 'MongoError',
+  [Symbol(mongoErrorContextSymbol)]: {} }
+[2022-02-03T19:58:37.053] [ERROR] dist_pro - { MongoError: authentication fail
+    at eval (webpack-internal:///480:1456:15)
+    at eval (webpack-internal:///477:869:7)
+    at eval (webpack-internal:///477:845:20)
+    at finish (webpack-internal:///81:233:16)
+    at handleEnd (webpack-internal:///81:243:7)
+    at eval (webpack-internal:///81:352:15)
+    at eval (webpack-internal:///477:532:18)
+  errors:
+   [ { name: 'cluster0-shard-00-02-5lqqr.mongodb.net:27017',
+       err: [MongoError] },
+     { name: 'cluster0-shard-00-00-5lqqr.mongodb.net:27017',
+       err: [MongoError] } ],
+  name: 'MongoError',
+  [Symbol(mongoErrorContextSymbol)]: {} }

@@ -32,7 +32,7 @@ if (process.env.NODE_ENV === 'development') {
   // mongoString = 'mongodb://127.0.0.1:27017/school_invoice_app'
 } else {
   mongoString = 'mongodb://user:n9wfWJMLDt1AyBMN@cluster0-shard-00-00-5lqqr.mongodb.net:27017,cluster0-shard-00-01-5lqqr.mongodb.net:27017,cluster0-shard-00-02-5lqqr.mongodb.net:27017/school_invoice_app_yamasa?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true'
-  dataBaseString = 'school_invoice_app_yamasa'
+  dataBaseString = 'school_invoice_app'
 }
 console.log(mongoString)
 const vueFlash = require('vue-flash')

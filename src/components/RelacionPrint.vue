@@ -96,7 +96,7 @@
   height: auto;
 }
 .relacion-print {
-  width: 21.6cm;
+  width: 22.8cm;
   min-height: 27.9cm;
   padding-left: 2cm;
   padding-top: 2cm;
